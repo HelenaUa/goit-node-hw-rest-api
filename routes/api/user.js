@@ -10,6 +10,8 @@ const { userLoginSchema } = require('../../helpers/validation/isValidJoi');
 
 const { HttpError } = require('../../helpers');
 
+const { authenticate } = require('../../middlewares');
+
 const { SECRET_KEY } = process.env;
 
 const router = express.Router();
@@ -34,7 +36,7 @@ router.post("/register", async (req, res, next) => {
             subscription: newUser.subscription,
         })
     }
-    catch {
+    catch (error) {
        next(error); 
     }
 });
@@ -62,12 +64,39 @@ router.post("/login", async (req, res, next) => {
         };
 
         const token = jwt.sign(payload, SECRET_KEY, { expiresIn: "23h" });
+        await User.findByIdAndUpdate(user._id, { token });
 
         res.status(200).json({
             token,
         });
     }
-    catch {
+    catch (error) {
+        next(error);
+    }
+});
+
+router.get("/current", authenticate, async (req, res, next) => {
+    try {
+        const { email, subscription } = req.user;
+        res.json({
+            email,
+            subscription,
+        })
+    }
+    catch (error) {
+        next(error);
+    }
+});
+
+router.post("/logout", authenticate, async (req, res, next) => {
+    try {
+        const { _id } = req.user;
+        await User.findByIdAndUpdate(_id, { token: "" });
+        res.json({
+            message: "Logout success",
+        })
+    }
+    catch (error) {
         next(error);
     }
 });
