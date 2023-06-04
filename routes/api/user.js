@@ -2,7 +2,6 @@ const express = require('express');
 const bcryt = require("bcrypt");
 const jwt = require('jsonwebtoken');
 const fs = require('fs/promises');
-const { nanoid } = require("nanoid");
 const path = require('path');
 const gravatar = require('gravatar');
 const jimp = require("jimp");
